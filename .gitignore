@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+# Jupyter Notebooks
+*.ipynb_checkpoints
+.ipynb_checkpoints/
+
+# Data files
+data/raw/
+data/processed/
+*.csv
+*.xlsx
+*.tsv
+
+# Jupyter Notebook checkpoints
+.notebooks/
+
+# VSCode
+.vscode/
+
+# Node/React
+app/node_modules/
+app/build/
+app/dist/
+.env
+*.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs & backups
+*.log
+*.zip
+*.bak
+*.tmp
