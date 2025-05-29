@@ -6,3 +6,8 @@ matplotlib
 seaborn
 notebook
 ipykernel
+lightgbm
+xgboost
+joblib
+fastapi
+uvicorn

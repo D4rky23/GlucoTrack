@@ -1,4 +1,4 @@
-# Python
+# Python artifacts
 __pycache__/
 *.pyc
 *.pyo
@@ -11,27 +11,28 @@ venv/
 *.ipynb_checkpoints
 .ipynb_checkpoints/
 
-# Data files
+# Data files - IGNORE ALL RAW/PROCESSED DATA!
 data/raw/
 data/processed/
 *.csv
 *.xlsx
 *.tsv
 
-# Jupyter Notebook checkpoints
+# Jupyter Notebook checkpoints (older Jupyter)
 .notebooks/
 
-# VSCode
+# VSCode workspace settings
 .vscode/
 
-# Node/React
+# Node/React artifacts
 app/node_modules/
 app/build/
 app/dist/
+app/.env
 .env
 *.env
 
-# OS files
+# OS-specific files
 .DS_Store
 Thumbs.db
 
@@ -40,3 +41,12 @@ Thumbs.db
 *.zip
 *.bak
 *.tmp
+
+# Machine Learning models and artifacts
+models/
+artifacts/
+
+# Temporary/test/output folders (optional)
+outputs/
+temp/
+tmp/
