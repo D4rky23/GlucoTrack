@@ -19,7 +19,7 @@ if __name__ == "__main__":
     print("⚡ Ready Check: http://localhost:8000/api/v1/ready")
     
     uvicorn.run(
-        app, 
+        "src.main:app", 
         host="0.0.0.0", 
         port=8000,
         reload=True,

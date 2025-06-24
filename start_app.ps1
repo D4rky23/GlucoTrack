@@ -1,4 +1,4 @@
-# GlucoTrack Application Startup Script
+﻿# GlucoTrack Application Startup Script
 # This script starts both the backend API and frontend development servers
 
 Write-Host "🔬 Starting GlucoTrack Application..." -ForegroundColor Green

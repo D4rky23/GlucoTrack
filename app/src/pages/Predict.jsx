@@ -8,16 +8,21 @@ import { usePredict } from '../hooks/usePredict';
 
 const Predict = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
-  const { prediction, loading, error, makePrediction } = usePredict();
+  const { result: prediction, loading, error, predict: makePrediction } = usePredict();
   const [lastPredictionData, setLastPredictionData] = useState(null);
 
   const onSubmit = async (data) => {
-    // Convert string inputs to numbers
-    const numericData = Object.keys(data).reduce((acc, key) => {
-      acc[key] = parseFloat(data[key]);
-      return acc;
-    }, {});
-
+    // Conversie robustă pentru toate câmpurile numerice
+    const numericData = { ...data };
+    ['age','bmi','HbA1c_level','blood_glucose_level','hypertension','heart_disease'].forEach(key => {
+      if (numericData[key] !== undefined && numericData[key] !== "") {
+        numericData[key] = Number(numericData[key]);
+      }
+    });
+    // Elimină câmpurile cu valoare ""
+    Object.keys(numericData).forEach(key => {
+      if (numericData[key] === "") delete numericData[key];
+    });
     setLastPredictionData(numericData);
     await makePrediction(numericData);
   };
@@ -28,14 +33,34 @@ const Predict = () => {
   };
 
   const inputFields = [
-    { name: 'glucose', label: 'Glucose Level', placeholder: 'e.g., 120', min: 0, max: 300 },
-    { name: 'bloodpressure', label: 'Blood Pressure', placeholder: 'e.g., 80', min: 0, max: 200 },
-    { name: 'skinthickness', label: 'Skin Thickness (mm)', placeholder: 'e.g., 20', min: 0, max: 100 },
-    { name: 'insulin', label: 'Insulin Level', placeholder: 'e.g., 80', min: 0, max: 1000 },
-    { name: 'bmi', label: 'BMI', placeholder: 'e.g., 25.5', min: 10, max: 70, step: 0.1 },
-    { name: 'diabetespedigreefunction', label: 'Diabetes Pedigree Function', placeholder: 'e.g., 0.5', min: 0, max: 3, step: 0.001 },
+    { name: 'gender', label: 'Gender', type: 'select', options: [
+      { value: '', label: 'Select gender' },
+      { value: 'Male', label: 'Male' },
+      { value: 'Female', label: 'Female' }
+    ] },
     { name: 'age', label: 'Age', placeholder: 'e.g., 35', min: 1, max: 120 },
-    { name: 'pregnancies', label: 'Pregnancies', placeholder: 'e.g., 2', min: 0, max: 20 }
+    { name: 'hypertension', label: 'Hypertension', type: 'select', options: [
+      { value: '', label: 'Select' },
+      { value: 0, label: 'No' },
+      { value: 1, label: 'Yes' }
+    ] },
+    { name: 'heart_disease', label: 'Heart Disease', type: 'select', options: [
+      { value: '', label: 'Select' },
+      { value: 0, label: 'No' },
+      { value: 1, label: 'Yes' }
+    ] },
+    { name: 'smoking_history', label: 'Smoking History', type: 'select', options: [
+      { value: '', label: 'Select' },
+      { value: 'never', label: 'Never' },
+      { value: 'No Info', label: 'No Info' },
+      { value: 'current', label: 'Current' },
+      { value: 'former', label: 'Former' },
+      { value: 'ever', label: 'Ever' },
+      { value: 'not current', label: 'Not Current' }
+    ] },
+    { name: 'bmi', label: 'BMI', placeholder: 'e.g., 25.5', min: 10, max: 80, step: 0.1 },
+    { name: 'HbA1c_level', label: 'HbA1c Level', placeholder: 'e.g., 5.5', min: 3.5, max: 15, step: 0.1 },
+    { name: 'blood_glucose_level', label: 'Blood Glucose Level', placeholder: 'e.g., 120', min: 50, max: 400 },
   ];
 
   return (
@@ -61,21 +86,36 @@ const Predict = () => {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {inputFields.map((field) => (
-                    <InputField
-                      key={field.name}
-                      label={field.label}
-                      error={errors[field.name]?.message}
-                      {...register(field.name, { 
-                        required: `${field.label} is required`,
-                        min: { value: field.min, message: `Must be at least ${field.min}` },
-                        max: { value: field.max, message: `Must be at most ${field.max}` }
-                      })}
-                      type="number"
-                      placeholder={field.placeholder}
-                      min={field.min}
-                      max={field.max}
-                      step={field.step || 1}
-                    />
+                    field.type === 'select' ? (
+                      <div key={field.name}>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">{field.label}</label>
+                        <select
+                          {...register(field.name, { required: true })}
+                          className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white"
+                          defaultValue=""
+                        >
+                          {field.options.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                        {errors[field.name] && (
+                          <span className="text-xs text-red-500">This field is required</span>
+                        )}
+                      </div>
+                    ) : (
+                      <InputField
+                        key={field.name}
+                        label={field.label}
+                        error={errors[field.name]?.message}
+                        register={register}
+                        name={field.name}
+                        type="number"
+                        placeholder={field.placeholder}
+                        min={field.min}
+                        max={field.max}
+                        step={field.step || 1}
+                      />
+                    )
                   ))}
                 </div>
 
@@ -113,7 +153,19 @@ const Predict = () => {
                     </svg>
                     <div>
                       <h4 className="text-red-800 dark:text-red-300 font-medium">Prediction Error</h4>
-                      <p className="text-red-700 dark:text-red-400 text-sm mt-1">{error}</p>
+                      <p className="text-red-700 dark:text-red-400 text-sm mt-1">
+                        {Array.isArray(error)
+                          ? (
+                            <ul className="list-disc list-inside">
+                              {error.map((err, idx) => (
+                                <li key={idx}>
+                                  {err.loc ? `${err.loc.join('.')} - ` : ''}{err.msg}
+                                </li>
+                              ))}
+                            </ul>
+                          )
+                          : (typeof error === 'string' ? error : JSON.stringify(error))}
+                      </p>
                     </div>
                   </div>
                 </div>

@@ -1,12 +1,12 @@
 export const ENDPOINTS = {
-  HEALTH: '/health',
-  READY: '/ready',
-  PREDICT: '/predict',
-  BATCH: '/batch-predict',
-  MODEL_INFO: '/model/info',
-  MODEL_METRICS: '/model/metrics',
-  MODEL_FEATURES: '/model/feature-names',
-  MODEL_RELOAD: '/model/reload',
-  VALIDATE: '/data/validate',
-  VALIDATE_BATCH: '/data/validate-batch'
+  HEALTH: '/api/v1/health',
+  READY: '/api/v1/ready',
+  PREDICT: '/api/v1/predict',
+  BATCH: '/api/v1/batch-predict',
+  MODEL_INFO: '/api/v1/model/info',
+  MODEL_METRICS: '/api/v1/model/metrics',
+  MODEL_FEATURES: '/api/v1/model/feature-names',
+  MODEL_RELOAD: '/api/v1/model/reload',
+  VALIDATE: '/api/v1/data/validate',
+  VALIDATE_BATCH: '/api/v1/data/validate-batch'
 }

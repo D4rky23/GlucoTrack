@@ -1,4 +1,4 @@
-import pickle
+import joblib
 import os
 import pandas as pd
 from typing import Optional, Tuple, Any
@@ -16,8 +16,9 @@ class ModelRepository:
     _model_loaded = False
     _scaler_loaded = False
     
-    MODEL_PATH = "models/lgbm_best_model.pkl"
-    SCALER_PATH = "models/scaler.pkl"
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    MODEL_PATH = os.path.join(BASE_DIR, "models", "lgbm_best_model.pkl")
+    SCALER_PATH = os.path.join(BASE_DIR, "models", "scaler.pkl")
     
     @classmethod
     def load_model(cls) -> Optional[Any]:
@@ -25,8 +26,7 @@ class ModelRepository:
         if cls._model is None:
             try:
                 if os.path.exists(cls.MODEL_PATH):
-                    with open(cls.MODEL_PATH, 'rb') as f:
-                        cls._model = pickle.load(f)
+                    cls._model = joblib.load(cls.MODEL_PATH)
                     cls._model_loaded = True
                     logger.info(f"Model loaded successfully from {cls.MODEL_PATH}")
                 else:
@@ -44,8 +44,7 @@ class ModelRepository:
         if cls._scaler is None:
             try:
                 if os.path.exists(cls.SCALER_PATH):
-                    with open(cls.SCALER_PATH, 'rb') as f:
-                        cls._scaler = pickle.load(f)
+                    cls._scaler = joblib.load(cls.SCALER_PATH)
                     cls._scaler_loaded = True
                     logger.info(f"Scaler loaded successfully from {cls.SCALER_PATH}")
                 else:
@@ -67,6 +66,9 @@ class ModelRepository:
     @classmethod
     def is_ready(cls) -> bool:
         """Check if both model and scaler are loaded"""
+        # Forțează încărcarea la fiecare check
+        cls.load_model()
+        cls.load_scaler()
         return cls._model_loaded and cls._scaler_loaded
     
     @classmethod

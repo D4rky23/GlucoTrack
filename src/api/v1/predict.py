@@ -29,6 +29,7 @@ def predict_diabetes(
     - **returns**: Risk score (0 or 1) and probability (0-1)
     """
     try:
+        logger.info(f"Received payload: {features}")
         result = PredictionService.predict_single(features)
         return result
     except ValueError as e:
