@@ -17,8 +17,8 @@ export default function Navbar() {
     }`
 
   return (
-    <nav className="bg-white dark:bg-slate-800 shadow-md fixed w-full z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
+    <nav className="fixed top-0 left-0 w-full z-50 bg-white dark:bg-slate-800 shadow-md h-16 flex items-center">
+      <div className="max-w-7xl mx-auto flex items-center justify-between w-full px-4">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-lg">G</span>
@@ -27,7 +27,6 @@ export default function Navbar() {
             GlucoTrack
           </h1>
         </div>
-        
         <div className="flex items-center space-x-2">
           <NavLink to="/" className={linkClasses}>
             Dashboard
@@ -41,7 +40,6 @@ export default function Navbar() {
           <NavLink to="/model" className={linkClasses}>
             Model Info
           </NavLink>
-          
           <button
             onClick={toggleDarkMode}
             className="ml-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300"

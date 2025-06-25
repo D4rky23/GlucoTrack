@@ -26,6 +26,7 @@ def get_model_info(_: bool = Depends(get_model_loaded)):
         raise HTTPException(status_code=500, detail="Error retrieving model information")
 
 @router.get("/model/feature-names", response_model=FeaturesResponse)
+@router.get("/feature-names", response_model=FeaturesResponse)
 def get_feature_names():
     """
     Get feature names and their specifications
@@ -39,6 +40,7 @@ def get_feature_names():
         raise HTTPException(status_code=500, detail="Error retrieving feature information")
 
 @router.get("/model/metrics", response_model=ModelMetrics)
+@router.get("/metrics", response_model=ModelMetrics)
 def get_model_metrics(_: bool = Depends(get_model_loaded)):
     """
     Get detailed model performance metrics
