@@ -5,6 +5,8 @@ from models.health import InputFeatures, PredictionResult
 from models.batch import BatchPredictionRequest, BatchPredictionResponse
 from repositories.model_repository import ModelRepository
 import logging
+import time
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -65,9 +67,11 @@ class PredictionService:
     @staticmethod
     def predict_batch(request: BatchPredictionRequest) -> BatchPredictionResponse:
         """Make predictions for multiple patients"""
+        # Record start time for processing
+        start_time = time.time()
         results = []
         failed_count = 0
-        
+        # Predict for each patient
         for patient_data in request.data:
             try:
                 result = PredictionService.predict_single(patient_data)
@@ -82,9 +86,13 @@ class PredictionService:
                     probability=0.0,
                     model_version=model_info["version"]
                 ))
-        
+        # Compute processing time and assign batch ID
+        processing_time_seconds = time.time() - start_time
+        batch_id = str(uuid.uuid4())
         return BatchPredictionResponse(
-            results=results,
+            predictions=results,
+            processing_time_seconds=processing_time_seconds,
+            batch_id=batch_id,
             processed_count=len(request.data),
             failed_count=failed_count
         )

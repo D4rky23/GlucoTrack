@@ -34,7 +34,7 @@ export default function Navbar() {
           <NavLink to="/predict" className={linkClasses}>
             Predict
           </NavLink>
-          <NavLink to="/batch" className={linkClasses}>
+          <NavLink to="/batch-predict" className={linkClasses}>
             Batch
           </NavLink>
           <NavLink to="/model" className={linkClasses}>

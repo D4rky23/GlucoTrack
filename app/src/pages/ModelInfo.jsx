@@ -6,7 +6,8 @@ import api from '../api/axios'; // Changed to default import
 import Navbar from '../components/Navbar';
 
 const ModelInfo = () => {
-  const { data: modelInfo, loading: modelLoading, error: modelError, fetchModelInfo } = useModel();
+  // FIX: Use correct destructuring for useModel
+  const { modelInfo, loading: modelLoading, error: modelError, fetchModelInfo } = useModel();
   const [featureNames, setFeatureNames] = useState(null);
   const [metrics, setMetrics] = useState(null);
   const [featuresLoading, setFeaturesLoading] = useState(false);
@@ -62,6 +63,9 @@ const ModelInfo = () => {
     }
   };
 
+  // DEBUG: Log modelInfo to help diagnose empty card
+  console.log('ModelInfo page: modelInfo =', modelInfo);
+
   return (
     <>
       <Navbar />
@@ -107,13 +111,19 @@ const ModelInfo = () => {
                   <p>Failed to load model information</p>
                   <p className="text-sm mt-1">{modelError}</p>
                 </div>
-              ) : modelInfo ? (
+              ) : modelInfo && Object.keys(modelInfo).length > 0 ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Model Name</label>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {modelInfo.model_name}
+                      </p>
+                    </div>
+                    <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Model Type</label>
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.model_type}
+                        {modelInfo.algorithm}
                       </p>
                     </div>
                     
@@ -125,16 +135,34 @@ const ModelInfo = () => {
                     </div>
                     
                     <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Created</label>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Trained At</label>
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {new Date(modelInfo.created_at).toLocaleDateString()}
+                        {modelInfo.trained_at ? new Date(modelInfo.trained_at).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
                     
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Features</label>
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.features_count}
+                        {modelInfo.features}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">ROC AUC</label>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {modelInfo.roc_auc}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Author</label>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {modelInfo.author}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Training Data</label>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {modelInfo.training_data}
                       </p>
                     </div>
                   </div>
@@ -144,6 +172,14 @@ const ModelInfo = () => {
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Description</label>
                       <p className="text-gray-900 dark:text-white mt-1">
                         {modelInfo.description}
+                      </p>
+                    </div>
+                  )}
+                  {modelInfo.extra_info && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Extra Info</label>
+                      <p className="text-gray-900 dark:text-white mt-1">
+                        {modelInfo.extra_info}
                       </p>
                     </div>
                   )}
@@ -158,7 +194,12 @@ const ModelInfo = () => {
                     </span>
                   </div>
                 </div>
-              ) : null}
+              ) : (
+                <div className="text-gray-500 dark:text-gray-400 text-center py-4">
+                  No model information available.<br />
+                  <span className="text-xs">(Check API response and browser console for errors.)</span>
+                </div>
+              )}
             </Card.Content>
           </Card>
 
@@ -258,22 +299,25 @@ const ModelInfo = () => {
                   <p>Failed to load feature names</p>
                   <p className="text-sm mt-1">{featuresError}</p>
                 </div>
-              ) : featureNames?.feature_names ? (
+              ) : featureNames?.features ? (
                 <div>
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    The model uses the following {featureNames.feature_names.length} features for prediction:
+                    The model uses the following {featureNames.features.length} features for prediction:
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {featureNames.feature_names.map((feature, index) => (
+                    {featureNames.features.map((feature, index) => (
                       <div 
                         key={index}
                         className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-center"
                       >
                         <div className="font-medium text-gray-900 dark:text-white">
-                          {feature.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                          {feature.name.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {feature}
+                          {/* English description for each feature */}
+                          {feature.type === 'numeric' && 'Numeric value'}
+                          {feature.type === 'categorical' && feature.allowed_values ? `Categorical: ${feature.allowed_values.join(', ')}` : ''}
+                          {feature.type === 'binary' && '0 = No, 1 = Yes'}
                         </div>
                       </div>
                     ))}

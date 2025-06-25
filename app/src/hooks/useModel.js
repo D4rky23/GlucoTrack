@@ -14,6 +14,7 @@ export const useModel = () => {
     setError(null)
     try {
       const { data } = await api.get(ENDPOINTS.MODEL_INFO)
+      console.log('Fetched model info from API:', data);
       setModelInfo(data)
       return data
     } catch (err) {

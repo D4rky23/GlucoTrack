@@ -10,7 +10,7 @@ const BatchPredict = () => {
   const [csvData, setCsvData] = useState(null);
   const [csvFile, setCsvFile] = useState(null);
   const [parseError, setParseError] = useState(null);
-  const { predictions, loading, error, makeBatchPrediction } = useBatchPredict();
+  const { results: predictions, loading, error, batchPredict, reset } = useBatchPredict();
 
   const handleFileUpload = (file) => {
     setCsvFile(file);
@@ -52,15 +52,33 @@ const BatchPredict = () => {
     });
   };
 
+  // Mappings for backend enums
+  const genderMap = { 0: 'Female', 1: 'Male', 2: 'Other' };
+  const smokingMap = {
+    0: 'never', 1: 'former', 2: 'current', 3: 'ever', 4: 'not current', 5: 'No Info'
+  };
+
   const handlePredict = async () => {
     if (!csvData) return;
-    await makeBatchPrediction(csvData);
+    // Convert numeric codes to expected strings
+    const payloadData = csvData.map(row => ({
+      gender: genderMap[row.gender] ?? row.gender,
+      age: row.age,
+      hypertension: row.hypertension,
+      heart_disease: row.heart_disease,
+      smoking_history: smokingMap[row.smoking_history] ?? row.smoking_history,
+      bmi: row.bmi,
+      HbA1c_level: row.HbA1c_level,
+      blood_glucose_level: row.blood_glucose_level
+    }));
+    await batchPredict(payloadData);
   };
 
   const handleReset = () => {
     setCsvData(null);
     setCsvFile(null);
     setParseError(null);
+    reset();
   };
 
   const downloadResults = () => {
@@ -83,12 +101,42 @@ const BatchPredict = () => {
 
   const getResultsSummary = () => {
     if (!predictions?.predictions) return null;
-
     const total = predictions.predictions.length;
-    const highRisk = predictions.predictions.filter(p => p.prediction === 1).length;
+    const highRisk = predictions.predictions.filter(p => p.risk === 1).length;
     const lowRisk = total - highRisk;
 
     return { total, highRisk, lowRisk };
+  };
+
+  // Helper to check if predictions is an error array (FastAPI validation error)
+  const isValidationError = (data) => {
+    if (!data) return false;
+    if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object' && data[0].loc && data[0].msg) return true;
+    if (data && Array.isArray(data.detail) && data.detail.length > 0 && data.detail[0].loc && data.detail[0].msg) return true;
+    return false;
+  };
+
+  // Helper to render validation errors as plain text (no React elements)
+  const renderValidationError = (data) => {
+    if (Array.isArray(data)) {
+      return data.map((err, i) =>
+        `${err.loc ? err.loc.join('.') : ''}: ${err.msg}`
+      ).join('\n');
+    }
+    if (data && Array.isArray(data.detail)) {
+      return data.detail.map((err, i) =>
+        `${err.loc ? err.loc.join('.') : ''}: ${err.msg}`
+      ).join('\n');
+    }
+    return 'Unknown error';
+  };
+
+  // Helper to format any error data as plain text
+  const formatError = (data) => {
+    if (typeof data === 'string') return data;
+    if (Array.isArray(data)) return data.map(err => `${err.loc?.join('.')}: ${err.msg}`).join('\n');
+    if (data && Array.isArray(data.detail)) return data.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join('\n');
+    return JSON.stringify(data);
   };
 
   const resultsSummary = getResultsSummary();
@@ -127,14 +175,14 @@ const BatchPredict = () => {
                   <div className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
                     <p>Your CSV must include these columns:</p>
                     <ul className="list-disc list-inside ml-2 space-y-0.5">
-                      <li><code>glucose</code> - Glucose level</li>
-                      <li><code>bloodpressure</code> - Blood pressure</li>
-                      <li><code>skinthickness</code> - Skin thickness (mm)</li>
-                      <li><code>insulin</code> - Insulin level</li>
-                      <li><code>bmi</code> - Body Mass Index</li>
-                      <li><code>diabetespedigreefunction</code> - Diabetes pedigree function</li>
+                      <li><code>gender</code> - Gender (0 = Female, 1 = Male, 2 = Other)</li>
                       <li><code>age</code> - Age in years</li>
-                      <li><code>pregnancies</code> - Number of pregnancies</li>
+                      <li><code>hypertension</code> - Hypertension (0 = No, 1 = Yes)</li>
+                      <li><code>heart_disease</code> - Heart disease (0 = No, 1 = Yes)</li>
+                      <li><code>smoking_history</code> - Smoking history (0 = Never, 1 = Former, 2 = Current, 3 = Ever, 4 = Not current, 5 = Unknown)</li>
+                      <li><code>bmi</code> - Body Mass Index</li>
+                      <li><code>HbA1c_level</code> - HbA1c level (%)</li>
+                      <li><code>blood_glucose_level</code> - Blood glucose level (mg/dL)</li>
                     </ul>
                   </div>
                 </div>
@@ -169,7 +217,8 @@ const BatchPredict = () => {
                   </div>
                 )}
 
-                {error && (
+                {/* Show API error or validation error */}
+                {(error || (predictions && isValidationError(predictions))) && (
                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                     <div className="flex">
                       <svg className="w-5 h-5 text-red-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,7 +226,9 @@ const BatchPredict = () => {
                       </svg>
                       <div>
                         <h4 className="text-red-800 dark:text-red-300 font-medium">Prediction Error</h4>
-                        <p className="text-red-700 dark:text-red-400 text-sm mt-1">{error}</p>
+                        <pre className="text-red-700 dark:text-red-400 text-sm mt-1 whitespace-pre-wrap">
+                          {formatError(error || predictions)}
+                        </pre>
                       </div>
                     </div>
                   </div>
@@ -218,18 +269,8 @@ const BatchPredict = () => {
               <Card.Title>Results Summary</Card.Title>
             </Card.Header>
             <Card.Content>
-              {!predictions && !error && (
-                <div className="text-center py-8">
-                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Upload CSV and run predictions to see results
-                  </p>
-                </div>
-              )}
-
-              {resultsSummary && (
+              {/* Only show summary if not a validation error */}
+              {!error && predictions && !isValidationError(predictions) && resultsSummary && (
                 <div className="space-y-6">
                   {/* Summary Stats */}
                   <div className="grid grid-cols-1 gap-4">
@@ -299,7 +340,7 @@ const BatchPredict = () => {
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     Download Results
                   </button>
@@ -311,7 +352,8 @@ const BatchPredict = () => {
       </div>
 
       {/* Results Table */}
-      {predictions?.predictions && predictions.predictions.length > 0 && (
+      {/* Only show table if not a validation error */}
+      {predictions?.predictions && !isValidationError(predictions) && predictions.predictions.length > 0 && (
         <div className="mt-8">
           <Card>
             <Card.Header>
@@ -332,13 +374,7 @@ const BatchPredict = () => {
                         Probability
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Age
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        BMI
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Glucose
+                        Model Version
                       </th>
                     </tr>
                   </thead>
@@ -349,19 +385,13 @@ const BatchPredict = () => {
                           {index + 1}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <ResultBadge prediction={result.prediction} size="sm" />
+                          <ResultBadge risk={result.risk} probability={result.probability} className="py-1 px-2 text-xs" />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                           {(result.probability * 100).toFixed(1)}%
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                          {result.age || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                          {result.bmi || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                          {result.glucose || 'N/A'}
+                          {result.model_version}
                         </td>
                       </tr>
                     ))}

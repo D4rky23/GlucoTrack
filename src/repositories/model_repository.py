@@ -77,10 +77,16 @@ class ModelRepository:
         if cls._model_info is None:
             cls._model_info = {
                 "algorithm": "LightGBM",
-                "trained_at": datetime(2025, 5, 28, 18, 2, 0),  # Example timestamp
-                "roc_auc": 0.982,  # Example metric
-                "features": 8,  # Based on the CSV columns we saw
-                "version": "lgbm_v1.2"
+                "trained_at": datetime(2025, 5, 28, 18, 2, 0),
+                "roc_auc": 0.980,
+                "features": 8,
+                "version": "4.6.0",
+                # New metadata fields
+                "model_name": "Diabetes Risk Classifier",
+                "description": "A LightGBM model trained to predict diabetes risk based on health indicators.",
+                "author": "Andrei-Alexandru M.",
+                "training_data": "Real-world clinical data from a modern official study of 100,000 individuals.",
+                "extra_info": "Model trained and validated on a large, diverse population. Tuned and hyperparameter-optimized by Andrei-Alexandru M. for robust, real-world diabetes risk prediction."
             }
         return cls._model_info
     
@@ -88,12 +94,15 @@ class ModelRepository:
     def get_model_metrics(cls) -> dict:
         """Get detailed model metrics"""
         return {
-            "accuracy": 0.956,
-            "precision": 0.923,
-            "recall": 0.889,
-            "f1_score": 0.906,
-            "roc_auc": 0.982,
-            "confusion_matrix": [[85432, 3421], [2156, 8073]]  # Example confusion matrix
+            "accuracy": 0.905,        # din notebook
+            "precision": 0.947,       # weighted avg
+            "recall": 0.905,          # weighted avg
+            "f1_score": 0.918,        # weighted avg
+            "roc_auc": 0.980,
+            "confusion_matrix": [
+                [16363, 1754],  # TN, FP
+                [136, 1563]     # FN, TP
+            ]
         }
     
     @classmethod

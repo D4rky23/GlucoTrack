@@ -5,11 +5,13 @@ import Loader from '../components/Loader';
 import { useModel } from '../hooks/useModel';
 
 const Dashboard = () => {
-  const { data: modelInfo, loading, error, fetchModelInfo } = useModel();
+  const { modelInfo, loading, error, fetchModelInfo } = useModel();
 
   useEffect(() => {
     fetchModelInfo();
-  }, [fetchModelInfo]);
+  }, []);
+
+  console.log('Dashboard render, modelInfo:', modelInfo, 'loading:', loading, 'error:', error);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -90,7 +92,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600 dark:text-gray-300">Model Type</span>
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {modelInfo.model_type}
+                    {modelInfo.algorithm}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -105,8 +107,25 @@ const Dashboard = () => {
                     Ready
                   </span>
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 dark:text-gray-300">Trained At</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {modelInfo.trained_at ? new Date(modelInfo.trained_at).toLocaleDateString() : 'N/A'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 dark:text-gray-300">ROC AUC</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {modelInfo.roc_auc}
+                  </span>
+                </div>
               </div>
-            ) : null}
+            ) : (
+              <div className="text-gray-500 dark:text-gray-400 text-center py-4">
+                No model information available.<br />
+                <span className="text-xs">(Check API response and browser console for errors.)</span>
+              </div>
+            )}
           </Card.Content>
         </Card>
 
@@ -119,7 +138,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <span className="text-gray-600 dark:text-gray-300">Features</span>
                 <span className="font-semibold text-gray-900 dark:text-white">
-                  {modelInfo?.features_count || 'N/A'}
+                  {modelInfo?.features ?? 'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
