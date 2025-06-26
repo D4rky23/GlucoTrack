@@ -4,6 +4,14 @@ import Loader from '../components/Loader';
 import { useModel } from '../hooks/useModel';
 import api from '../api/axios'; // Changed to default import
 import Navbar from '../components/Navbar';
+import BackgroundIcons from '../components/BackgroundIcons';
+import '../components/background-icons.css';
+import SkeletonLoader from '../components/SkeletonLoader';
+import Toast from '../components/Toast';
+import InfoTooltip from '../components/InfoTooltip';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import AnimatedProgressBar from '../components/AnimatedProgressBar';
+import RevealOnScroll from '../components/RevealOnScroll';
 
 const ModelInfo = () => {
   // FIX: Use correct destructuring for useModel
@@ -15,12 +23,17 @@ const ModelInfo = () => {
   const [featuresError, setFeaturesError] = useState(null);
   const [metricsError, setMetricsError] = useState(null);
   const [reloadLoading, setReloadLoading] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
 
   useEffect(() => {
     fetchModelInfo();
     fetchFeatureNames();
     fetchMetrics();
   }, [fetchModelInfo]);
+
+  useEffect(() => {
+    if (modelInfo && !modelLoading && !modelError) setToastOpen(true);
+  }, [modelInfo, modelLoading, modelError]);
 
   const fetchFeatureNames = async () => {
     setFeaturesLoading(true);
@@ -67,10 +80,12 @@ const ModelInfo = () => {
   console.log('ModelInfo page: modelInfo =', modelInfo);
 
   return (
-    <>
+    <div className="relative">
+      <BackgroundIcons />
       <Navbar />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16">
         {/* Header */}
+        <RevealOnScroll y={-30} delay={0}>
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -96,103 +111,91 @@ const ModelInfo = () => {
             {reloadLoading ? 'Reloading...' : 'Reload Model'}
           </button>
         </div>
+        </RevealOnScroll>
 
+        <RevealOnScroll y={30} delay={0.1}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Model Info */}
-          <Card>
+          <Card className="transition-all duration-300 bg-gradient-to-br from-white/90 via-emerald-50/80 to-white/90 dark:from-gray-900/80 dark:via-emerald-900/30 dark:to-gray-900/80 hover:from-emerald-50 hover:to-emerald-100 dark:hover:from-emerald-900/40 dark:hover:to-gray-900/90 shadow-md hover:shadow-xl">
             <Card.Header>
               <Card.Title>Model Details</Card.Title>
             </Card.Header>
             <Card.Content>
               {modelLoading ? (
-                <Loader />
+                <div className="space-y-3">
+                  <SkeletonLoader height={24} width="60%" />
+                  <SkeletonLoader height={24} width="40%" />
+                  <SkeletonLoader height={24} width="80%" />
+                  <SkeletonLoader height={24} width="50%" />
+                </div>
               ) : modelError ? (
                 <div className="text-red-600 dark:text-red-400">
                   <p>Failed to load model information</p>
                   <p className="text-sm mt-1">{modelError}</p>
                 </div>
-              ) : modelInfo && Object.keys(modelInfo).length > 0 ? (
+              ) : modelInfo ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Model Name</label>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.model_name}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Model Type</label>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.algorithm}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Version</label>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.version}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Trained At</label>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.trained_at ? new Date(modelInfo.trained_at).toLocaleDateString() : 'N/A'}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Features</label>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.features}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">ROC AUC</label>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.roc_auc}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Author</label>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.author}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Training Data</label>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modelInfo.training_data}
-                      </p>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600 dark:text-gray-300">Algorithm
+                      <InfoTooltip content="The machine learning algorithm used for prediction." />
+                    </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {modelInfo.algorithm}
+                    </span>
                   </div>
-
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600 dark:text-gray-300">Version</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {modelInfo.version}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600 dark:text-gray-300">ROC AUC
+                      <InfoTooltip content="Receiver Operating Characteristic Area Under Curve. Measures model performance (1 = perfect, 0.5 = random)." />
+                    </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {modelInfo.roc_auc}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600 dark:text-gray-300">Features
+                      <InfoTooltip content="Number of input variables used by the model." />
+                    </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {modelInfo.features}
+                    </span>
+                  </div>
+                  {/* --- Extra Model Metadata --- */}
+                  {modelInfo.model_name && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-300">Model Name</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{modelInfo.model_name}</span>
+                    </div>
+                  )}
                   {modelInfo.description && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Description</label>
-                      <p className="text-gray-900 dark:text-white mt-1">
-                        {modelInfo.description}
-                      </p>
+                    <div className="flex items-center">
+                      <span className="text-gray-600 dark:text-gray-300">Description:</span>
+                      <span className="ml-2 text-gray-900 dark:text-white">{modelInfo.description}</span>
+                    </div>
+                  )}
+                  {modelInfo.author && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-300">Author</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{modelInfo.author}</span>
+                    </div>
+                  )}
+                  {modelInfo.training_data && (
+                    <div className="flex items-center">
+                      <span className="text-gray-600 dark:text-gray-300">Training Data:</span>
+                      <span className="ml-2 text-gray-900 dark:text-white">{modelInfo.training_data}</span>
                     </div>
                   )}
                   {modelInfo.extra_info && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Extra Info</label>
-                      <p className="text-gray-900 dark:text-white mt-1">
-                        {modelInfo.extra_info}
-                      </p>
+                    <div className="flex items-center">
+                      <span className="text-gray-600 dark:text-gray-300">Extra Info:</span>
+                      <span className="ml-2 text-gray-900 dark:text-white">{modelInfo.extra_info}</span>
                     </div>
                   )}
-
-                  <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400">Status</span>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
-                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      Ready
-                    </span>
-                  </div>
                 </div>
               ) : (
                 <div className="text-gray-500 dark:text-gray-400 text-center py-4">
@@ -204,13 +207,17 @@ const ModelInfo = () => {
           </Card>
 
           {/* Model Metrics */}
-          <Card>
+          <Card className="transition-all duration-300 bg-gradient-to-br from-white/90 via-emerald-50/80 to-white/90 dark:from-gray-900/80 dark:via-emerald-900/30 dark:to-gray-900/80 hover:from-emerald-50 hover:to-emerald-100 dark:hover:from-emerald-900/40 dark:hover:to-gray-900/90 shadow-md hover:shadow-xl">
             <Card.Header>
               <Card.Title>Performance Metrics</Card.Title>
             </Card.Header>
             <Card.Content>
               {metricsLoading ? (
-                <Loader />
+                <div className="space-y-3">
+                  <SkeletonLoader height={32} width="100%" />
+                  <SkeletonLoader height={32} width="80%" />
+                  <SkeletonLoader height={32} width="60%" />
+                </div>
               ) : metricsError ? (
                 <div className="text-red-600 dark:text-red-400">
                   <p>Failed to load model metrics</p>
@@ -218,6 +225,30 @@ const ModelInfo = () => {
                 </div>
               ) : metrics ? (
                 <div className="space-y-6">
+                  {/* Animated Bar Chart for Metrics */}
+                  <div className="w-full h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={[{
+                        name: 'Accuracy', value: metrics.accuracy * 100
+                      }, {
+                        name: 'Precision', value: metrics.precision * 100
+                      }, {
+                        name: 'Recall', value: metrics.recall * 100
+                      }, {
+                        name: 'F1 Score', value: metrics.f1_score * 100
+                      }]}
+                      >
+                        <XAxis dataKey="name" stroke="#888" fontSize={14} tickLine={false} axisLine={false} />
+                        <YAxis hide domain={[0, 100]} />
+                        <Tooltip formatter={(v) => v.toFixed(1) + '%'} />
+                        <Bar dataKey="value" radius={[8,8,0,0]}>
+                          {['#10B981','#3B82F6','#F59E42','#A78BFA'].map((color, idx) => (
+                            <Cell key={color} fill={color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                   {/* Overall Metrics */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-center">
@@ -226,21 +257,18 @@ const ModelInfo = () => {
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Accuracy</div>
                     </div>
-                    
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-center">
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">
                         {(metrics.precision * 100).toFixed(1)}%
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Precision</div>
                     </div>
-                    
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-center">
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">
                         {(metrics.recall * 100).toFixed(1)}%
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Recall</div>
                     </div>
-                    
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-center">
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">
                         {(metrics.f1_score * 100).toFixed(1)}%
@@ -248,28 +276,12 @@ const ModelInfo = () => {
                       <div className="text-sm text-gray-600 dark:text-gray-400">F1 Score</div>
                     </div>
                   </div>
-
-                  {/* Additional Metrics */}
-                  {metrics.auc && (
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-gray-900 dark:text-white">Additional Metrics</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">AUC Score</span>
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {(metrics.auc * 100).toFixed(1)}%
-                          </span>
-                        </div>
-                        
-                        {metrics.specificity && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-400">Specificity</span>
-                            <span className="font-medium text-gray-900 dark:text-white">
-                              {(metrics.specificity * 100).toFixed(1)}%
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                  {/* Animated Progress Bar for AUC */}
+                  {metrics.roc_auc && (
+                    <div className="mt-6">
+                      <h4 className="font-medium text-gray-900 dark:text-white mb-2">ROC AUC</h4>
+                      <AnimatedProgressBar value={metrics.roc_auc} max={1} />
+                      <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">{(metrics.roc_auc * 100).toFixed(1)}%</div>
                     </div>
                   )}
                 </div>
@@ -284,10 +296,12 @@ const ModelInfo = () => {
             </Card.Content>
           </Card>
         </div>
+        </RevealOnScroll>
 
         {/* Feature Names */}
+        <RevealOnScroll y={30} delay={0.2}>
         <div className="mt-6">
-          <Card>
+          <Card className="transition-all duration-300 bg-gradient-to-br from-white/90 via-emerald-50/80 to-white/90 dark:from-gray-900/80 dark:via-emerald-900/30 dark:to-gray-900/80 hover:from-emerald-50 hover:to-emerald-100 dark:hover:from-emerald-900/40 dark:hover:to-gray-900/90 shadow-md hover:shadow-xl">
             <Card.Header>
               <Card.Title>Model Features</Card.Title>
             </Card.Header>
@@ -334,10 +348,12 @@ const ModelInfo = () => {
             </Card.Content>
           </Card>
         </div>
+        </RevealOnScroll>
 
         {/* Technical Details */}
+        <RevealOnScroll y={30} delay={0.3}>
         <div className="mt-6">
-          <Card>
+          <Card className="transition-all duration-300 bg-gradient-to-br from-white/90 via-emerald-50/80 to-white/90 dark:from-gray-900/80 dark:via-emerald-900/30 dark:to-gray-900/80 hover:from-emerald-50 hover:to-emerald-100 dark:hover:from-emerald-900/40 dark:hover:to-gray-900/90 shadow-md hover:shadow-xl">
             <Card.Header>
               <Card.Title>Technical Details</Card.Title>
             </Card.Header>
@@ -391,8 +407,11 @@ const ModelInfo = () => {
             </Card.Content>
           </Card>
         </div>
+        </RevealOnScroll>
+
+        <Toast open={toastOpen} message="Model info loaded!" onClose={() => setToastOpen(false)} />
       </div>
-    </>
+    </div>
   );
 };
 

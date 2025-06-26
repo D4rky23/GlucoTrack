@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "framer-motion": "^12.19.1",
+    "recharts": "^3.0.0"
+  }
+}

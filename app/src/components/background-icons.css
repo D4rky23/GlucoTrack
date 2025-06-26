@@ -1,0 +1,81 @@
+/* --- Background Icons Modern Thematic --- */
+.background-icons-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 1. Picături de sânge pulsatile */
+.blood-drop {
+  opacity: 0;
+  animation: pulseDrop 3s infinite;
+  will-change: opacity, transform;
+}
+@keyframes pulseDrop {
+  0% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: 0.15; transform: scale(1.0); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+
+/* 2. Linie ECG animată */
+.ecg-line {
+  opacity: 0.08;
+  animation: ecgMove 8s linear infinite;
+}
+@keyframes ecgMove {
+  0% { transform: translateX(-20%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 3. Glucometru pop-in */
+.glucometer {
+  opacity: 0;
+  animation: glucometerPop 4s infinite;
+}
+@keyframes glucometerPop {
+  0% { opacity: 0; transform: scale(0); }
+  10% { opacity: 0.2; transform: scale(1); }
+  80% { opacity: 0.2; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+
+/* 4. Molecule de glucoză animate */
+.glucose-molecule {
+  opacity: 0.12;
+  animation: rotateMolecule 10s linear infinite;
+}
+@keyframes rotateMolecule {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.molecule-bond {
+  animation: bondGlow 2s infinite;
+}
+@keyframes bondGlow {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.1; }
+}
+
+/* 5. Mâncare sănătoasă plutitoare */
+.healthy-food {
+  opacity: 0;
+  animation: floatFood 7s linear infinite;
+}
+@keyframes floatFood {
+  0% { opacity: 0; transform: translateY(20px); }
+  10% { opacity: 0.1; }
+  90% { opacity: 0.1; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* 6. Cercuri concentrice biofeedback */
+.biofeedback-circle {
+  opacity: 0.2;
+  animation: sonarCircle 3.5s linear infinite;
+}
+@keyframes sonarCircle {
+  0% { opacity: 0.2; transform: scale(0); }
+  80% { opacity: 0; transform: scale(3); }
+  100% { opacity: 0; transform: scale(3.2); }
+}

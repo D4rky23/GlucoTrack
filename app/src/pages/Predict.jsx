@@ -5,11 +5,18 @@ import InputField from '../components/InputField';
 import Loader from '../components/Loader';
 import ResultBadge from '../components/ResultBadge';
 import { usePredict } from '../hooks/usePredict';
+import BackgroundIcons from '../components/BackgroundIcons';
+import '../components/background-icons.css';
+import SkeletonLoader from '../components/SkeletonLoader';
+import Toast from '../components/Toast';
+import InfoTooltip from '../components/InfoTooltip';
+import RevealOnScroll from '../components/RevealOnScroll';
 
 const Predict = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const { result: prediction, loading, error, predict: makePrediction } = usePredict();
   const [lastPredictionData, setLastPredictionData] = useState(null);
+  const [toastOpen, setToastOpen] = useState(false);
 
   const onSubmit = async (data) => {
     // Conversie robustă pentru toate câmpurile numerice
@@ -25,6 +32,7 @@ const Predict = () => {
     });
     setLastPredictionData(numericData);
     await makePrediction(numericData);
+    setToastOpen(true);
   };
 
   const handleReset = () => {
@@ -64,7 +72,9 @@ const Predict = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+      <BackgroundIcons />
+      <RevealOnScroll y={-30} delay={0}>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -74,24 +84,26 @@ const Predict = () => {
           Enter patient health data to predict diabetes risk
         </p>
       </div>
+      </RevealOnScroll>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
         {/* Form */}
-        <div className="lg:col-span-2">
-          <Card>
+        <RevealOnScroll y={30} delay={0.1}>
+        <div>
+          <Card className="transition-all duration-300 bg-gradient-to-br from-white/90 via-emerald-50/80 to-white/90 dark:from-gray-900/80 dark:via-emerald-900/30 dark:to-gray-900/80 hover:from-emerald-50 hover:to-emerald-100 dark:hover:from-emerald-900/40 dark:hover:to-gray-900/90 shadow-md hover:shadow-xl">
             <Card.Header>
               <Card.Title>Patient Health Data</Card.Title>
             </Card.Header>
             <Card.Content>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {inputFields.map((field) => (
                     field.type === 'select' ? (
                       <div key={field.name}>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">{field.label}</label>
                         <select
                           {...register(field.name, { required: true })}
-                          className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white"
+                          className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200"
                           defaultValue=""
                         >
                           {field.options.map(opt => (
@@ -114,6 +126,7 @@ const Predict = () => {
                         min={field.min}
                         max={field.max}
                         step={field.step || 1}
+                        className="rounded-xl px-4 py-3 bg-white dark:bg-gray-900 dark:text-white shadow-sm border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200"
                       />
                     )
                   ))}
@@ -123,10 +136,10 @@ const Predict = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center transform hover:scale-105 hover:shadow-lg focus:scale-105 focus:shadow-lg"
                   >
                     {loading ? (
-                      <Loader size="sm" className="mr-2" />
+                      <SkeletonLoader height={24} width={24} className="mr-2 inline-block align-middle" />
                     ) : (
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -173,10 +186,12 @@ const Predict = () => {
             </Card.Content>
           </Card>
         </div>
+        </RevealOnScroll>
 
         {/* Results */}
+        <RevealOnScroll y={30} delay={0.2}>
         <div>
-          <Card>
+          <Card className="transition-all duration-300 bg-gradient-to-br from-white/90 via-emerald-50/80 to-white/90 dark:from-gray-900/80 dark:via-emerald-900/30 dark:to-gray-900/80 hover:from-emerald-50 hover:to-emerald-100 dark:hover:from-emerald-900/40 dark:hover:to-gray-900/90 shadow-md hover:shadow-xl">
             <Card.Header>
               <Card.Title>Prediction Results</Card.Title>
             </Card.Header>
@@ -280,9 +295,15 @@ const Predict = () => {
             </Card.Content>
           </Card>
         </div>
+        </RevealOnScroll>
       </div>
+
+      <Toast open={toastOpen} message="Prediction complete!" onClose={() => setToastOpen(false)} />
     </div>
   );
 };
 
 export default Predict;
+
+// Example InfoTooltip usage for a field:
+// <InfoTooltip content="Body Mass Index. Raport între greutate și înălțime."><span className="ml-1">ℹ️</span></InfoTooltip>

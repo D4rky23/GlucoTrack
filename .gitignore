@@ -31,6 +31,7 @@ app/dist/
 app/.env
 .env
 *.env
+node_modules/
 
 # OS-specific files
 .DS_Store

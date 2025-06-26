@@ -5,11 +5,17 @@ import FileUpload from '../components/FileUpload';
 import Loader from '../components/Loader';
 import ResultBadge from '../components/ResultBadge';
 import { useBatchPredict } from '../hooks/useBatchPredict';
+import BackgroundIcons from '../components/BackgroundIcons';
+import '../components/background-icons.css';
+import SkeletonLoader from '../components/SkeletonLoader';
+import Toast from '../components/Toast';
+import InfoTooltip from '../components/InfoTooltip';
 
 const BatchPredict = () => {
   const [csvData, setCsvData] = useState(null);
   const [csvFile, setCsvFile] = useState(null);
   const [parseError, setParseError] = useState(null);
+  const [toastOpen, setToastOpen] = useState(false);
   const { results: predictions, loading, error, batchPredict, reset } = useBatchPredict();
 
   const handleFileUpload = (file) => {
@@ -72,6 +78,7 @@ const BatchPredict = () => {
       blood_glucose_level: row.blood_glucose_level
     }));
     await batchPredict(payloadData);
+    setToastOpen(true);
   };
 
   const handleReset = () => {
@@ -142,7 +149,8 @@ const BatchPredict = () => {
   const resultsSummary = getResultsSummary();
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+      <BackgroundIcons />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -156,7 +164,7 @@ const BatchPredict = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upload Section */}
         <div className="lg:col-span-2">
-          <Card>
+          <Card className="transition-all duration-300 bg-gradient-to-br from-white/90 via-emerald-50/80 to-white/90 dark:from-gray-900/80 dark:via-emerald-900/30 dark:to-gray-900/80 hover:from-emerald-50 hover:to-emerald-100 dark:hover:from-emerald-900/40 dark:hover:to-gray-900/90 shadow-md hover:shadow-xl">
             <Card.Header>
               <Card.Title>Upload Patient Data</Card.Title>
             </Card.Header>
@@ -166,11 +174,18 @@ const BatchPredict = () => {
                   onFileUpload={handleFileUpload}
                   disabled={loading}
                 />
+                {loading && (
+                  <div className="my-4">
+                    <SkeletonLoader height={32} width="100%" />
+                    <SkeletonLoader height={24} width="80%" className="mt-2" />
+                  </div>
+                )}
 
                 {/* CSV Requirements */}
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                   <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">
                     CSV Format Requirements
+                    <InfoTooltip content={"The CSV must contain exactly the required columns, with values encoded as specified. Any deviation will trigger a validation error."} />
                   </h4>
                   <div className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
                     <p>Your CSV must include these columns:</p>
@@ -238,7 +253,7 @@ const BatchPredict = () => {
                   <button
                     onClick={handlePredict}
                     disabled={!csvData || loading}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center transform hover:scale-105 hover:shadow-lg focus:scale-105 focus:shadow-lg"
                   >
                     {loading ? (
                       <Loader size="sm" className="mr-2" />
@@ -408,6 +423,8 @@ const BatchPredict = () => {
           </Card>
         </div>
       )}
+
+      <Toast open={toastOpen} message="Batch prediction complete!" onClose={() => setToastOpen(false)} />
     </div>
   );
 };
