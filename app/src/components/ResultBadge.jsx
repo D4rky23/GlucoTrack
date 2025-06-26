@@ -1,8 +1,25 @@
 export default function ResultBadge({ risk, probability, className = '' }) {
+  // Probabilistic risk label and color (like Predict page)
   let label = 'Unknown Risk';
   let badgeClasses = 'bg-gray-400 text-white border-gray-200';
   let iconClasses = 'text-gray-100';
-  if (risk === 'high') {
+
+  // Probabilistic logic
+  if (typeof probability === 'number') {
+    if (probability >= 0.75) {
+      label = 'High Risk';
+      badgeClasses = 'bg-red-600 text-white border-red-200';
+      iconClasses = 'text-red-100';
+    } else if (probability >= 0.5) {
+      label = 'Medium Risk';
+      badgeClasses = 'bg-orange-400 text-white border-orange-200';
+      iconClasses = 'text-orange-100';
+    } else {
+      label = 'Low Risk';
+      badgeClasses = 'bg-emerald-600 text-white border-emerald-200';
+      iconClasses = 'text-emerald-100';
+    }
+  } else if (risk === 'high') {
     label = 'High Risk';
     badgeClasses = 'bg-red-600 text-white border-red-200';
     iconClasses = 'text-red-100';

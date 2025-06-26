@@ -63,6 +63,7 @@ const BatchPredict = () => {
   const smokingMap = {
     0: 'never', 1: 'former', 2: 'current', 3: 'ever', 4: 'not current', 5: 'No Info'
   };
+  const riskMap = { 1: 'high', 0: 'low', 2: 'medium' };
 
   const handlePredict = async () => {
     if (!csvData) return;
@@ -400,7 +401,7 @@ const BatchPredict = () => {
                           {index + 1}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <ResultBadge risk={result.risk} probability={result.probability} className="py-1 px-2 text-xs" />
+                          <ResultBadge risk={riskMap[result.risk] ?? 'unknown'} probability={result.probability} className="py-1 px-2 text-xs" />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                           {(result.probability * 100).toFixed(1)}%
