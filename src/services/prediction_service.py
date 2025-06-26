@@ -50,14 +50,15 @@ class PredictionService:
             # Make prediction
             prediction = model.predict(df)[0]
             probability = model.predict_proba(df)[0][1]  # Probability of positive class
-            
+            # Confidence: abs(probability - 0.5) * 2 (distance from uncertainty)
+            confidence = float(abs(probability - 0.5) * 2)
             # Get model info for version
             model_info = ModelRepository.get_model_info()
-            
             return PredictionResult(
                 risk=int(prediction),
                 probability=float(probability),
-                model_version=model_info["version"]
+                model_version=model_info["version"],
+                confidence=confidence
             )
         except Exception as e:
             import traceback

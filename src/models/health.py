@@ -25,6 +25,7 @@ class PredictionResult(BaseModel):
     risk: int = Field(..., description="Diabetes risk: 0 (low) or 1 (high)")
     probability: float = Field(..., ge=0, le=1, description="Probability of diabetes (0-1)")
     model_version: str = Field(..., description="Model version used for prediction")
+    confidence: Optional[float] = Field(None, ge=0, le=1, description="Model confidence (0-1, optional)")
 
 class BatchPredictionRequest(BaseModel):
     data: List[InputFeatures] = Field(..., description="List of patient data for batch prediction")
