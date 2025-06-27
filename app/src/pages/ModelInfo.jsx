@@ -64,7 +64,7 @@ const ModelInfo = () => {
   const handleReloadModel = async () => {
     setReloadLoading(true);
     try {
-      await api.post('/model/reload');
+      await api.post('/api/v1/model/reload');
       // Refresh all data after reload
       await fetchModelInfo();
       await fetchFeatureNames();

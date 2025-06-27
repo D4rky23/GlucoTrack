@@ -115,7 +115,7 @@ export default function Footer({
           </div>
           <button
             onClick={openLegalModal}
-            className="mt-1 px-3 py-1.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-medium transition-all"
+            className="w-full md:w-auto mt-2 md:mt-1 px-3 py-1.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-medium transition-all text-center md:text-right"
             aria-label="Privacy & Terms"
           >
             ⚖️ Privacy & Terms

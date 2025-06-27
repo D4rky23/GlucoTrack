@@ -77,7 +77,10 @@ export default function Navbar() {
         {/* Mobile burger */}
         <div className="md:hidden flex items-center">
           <button
-            onClick={() => setMenuOpen((v) => !v)}
+            onClick={() => {
+              setMenuOpen((v) => !v);
+              if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             className="p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             aria-label="Open menu"
           >

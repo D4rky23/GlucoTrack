@@ -19,16 +19,16 @@ function App() {
       </main>
       <Footer openLegalModal={openLegalModal} />
       {showLegal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300 animate-fade-in">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 max-w-md w-full relative transform transition-all duration-300 animate-modal-pop">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300 animate-fade-in px-2">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4 sm:p-6 max-w-sm sm:max-w-md md:max-w-lg w-full relative transform transition-all duration-300 animate-modal-pop overflow-y-auto max-h-[90vh]">
             <button
               onClick={closeLegalModal}
-              className="absolute top-2 right-2 text-slate-400 hover:text-emerald-600 text-xl font-bold"
+              className="absolute top-2 right-2 text-slate-400 hover:text-emerald-600 text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
               aria-label="Close"
             >
               ×
             </button>
-            <h2 className="text-lg font-semibold mb-2 text-slate-800 dark:text-slate-100">🛡️ Privacy & Terms</h2>
+            <h2 className="text-lg font-semibold mb-2 text-slate-800 dark:text-slate-100 text-center">🛡️ Privacy & Terms</h2>
             <div className="text-slate-600 dark:text-slate-300 text-sm mb-2 space-y-3">
               <div><strong>Effective Date:</strong> June 26, 2025<br/><strong>Last Updated:</strong> June 26, 2025</div>
               <div>
@@ -58,7 +58,7 @@ function App() {
             </div>
             <button
               onClick={closeLegalModal}
-              className="mt-4 px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition-all text-sm"
+              className="mt-4 w-full sm:w-auto px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition-all text-sm"
             >
               Close
             </button>
